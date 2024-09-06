@@ -171,3 +171,19 @@ button.stop:hover {
   background-color: #2980b9;
   color: white;
 }
+
+button.reboot {
+  background-color: #f39c12;
+}
+
+button.reboot:hover {
+  background-color: #e67e22;
+}
+
+button.terminate {
+  background-color: #e74c3c;
+}
+
+button.terminate:hover {
+  background-color: #c0392b;
+}

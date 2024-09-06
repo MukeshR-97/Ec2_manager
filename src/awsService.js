@@ -45,3 +45,26 @@ export const stopInstance = async (instanceId, region, accessKeyId, secretAccess
     throw error;
   }
 };
+
+export const rebootInstance = async (instanceId, region, accessKeyId, secretAccessKey) => {
+  const ec2 = getEc2Instance(region, accessKeyId, secretAccessKey);
+
+  try {
+    await ec2.rebootInstances({ InstanceIds: [instanceId] }).promise();
+  } catch (error) {
+    console.error('Error rebooting instance:', error);
+    throw error;
+  }
+};
+
+export const terminateInstance = async (instanceId, region, accessKeyId, secretAccessKey) => {
+  const ec2 = getEc2Instance(region, accessKeyId, secretAccessKey);
+
+  try {
+    await ec2.terminateInstances({ InstanceIds: [instanceId] }).promise();
+  } catch (error) {
+    console.error('Error terminating instance:', error);
+    throw error;
+  }
+};
+

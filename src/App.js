@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { listInstances, startInstance, stopInstance } from "./awsService"; // Assume you have awsService for API calls
+import { listInstances, startInstance, stopInstance, rebootInstance, terminateInstance } from "./awsService";
 import "./App.css";
 
 const regions = ["us-east-1", "us-west-2", "ap-south-1", "us-east-2", "us-west-1"];
@@ -91,6 +91,23 @@ function Instances() {
     setCurrentPage(page);
   };
 
+  // Add handleReboot and handleTerminate functions
+  const handleReboot = async (instanceId) => {
+    const accessKeyId = localStorage.getItem("AWS_ACCESS_KEY_ID");
+    const secretAccessKey = localStorage.getItem("AWS_SECRET_ACCESS_KEY");
+    await rebootInstance(instanceId, selectedRegion, accessKeyId, secretAccessKey);
+    fetchInstances();
+  };
+
+  const handleTerminate = async (instanceId) => {
+    const accessKeyId = localStorage.getItem("AWS_ACCESS_KEY_ID");
+    const secretAccessKey = localStorage.getItem("AWS_SECRET_ACCESS_KEY");
+    if (window.confirm("Are you sure you want to terminate this instance? This action cannot be undone.")) {
+      await terminateInstance(instanceId, selectedRegion, accessKeyId, secretAccessKey);
+      fetchInstances();
+    }
+  };
+
   // Get paginated instances
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -158,7 +175,7 @@ function Instances() {
           <p className="error-message">{error}</p>
         ) : filteredInstances.length ? (
           currentItems.map((instance) => (
-            <div className="instance-card" key={instance.InstanceId}>
+           <div className="instance-card" key={instance.InstanceId}>
               <h2>Instance ID: {instance.InstanceId}</h2>
               <p><strong>Name:</strong> {instance.Tags.find(tag => tag.Key === "Name")?.Value || "N/A"}</p>
               <p><strong>Type:</strong> {instance.InstanceType}</p>
@@ -166,10 +183,14 @@ function Instances() {
               <p><strong>State:</strong> {instance.State.Name}</p>
               <div className="buttons">
                 {instance.State.Name === 'running' ? (
-                  <button className="stop" onClick={() => handleStop(instance.InstanceId)}>Stop</button>
+                  <>
+                    <button className="stop" onClick={() => handleStop(instance.InstanceId)}>Stop</button>
+                    <button className="reboot" onClick={() => handleReboot(instance.InstanceId)}>Reboot</button>
+                  </>
                 ) : (
                   <button className="start" onClick={() => handleStart(instance.InstanceId)}>Start</button>
                 )}
+                <button className="terminate" onClick={() => handleTerminate(instance.InstanceId)}>Terminate</button>
               </div>
             </div>
           ))
